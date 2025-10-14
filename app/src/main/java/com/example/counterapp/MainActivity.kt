@@ -46,8 +46,8 @@ val ComponentActivity.dataStore by preferencesDataStore(name = "settings")
 
 class MainActivity : ComponentActivity() {
 
-    // Key used to save/load counter value in DataStore
     private val COUNT_KEY = intPreferencesKey("count")
+    private val TOTAL_SETS_KEY = intPreferencesKey("total_sets")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
 
                 // --- STATE VARIABLES (remembered across recompositions) ---
                 var count by remember { mutableIntStateOf(0) }              // current set count
-                var totalSets by remember { mutableIntStateOf(10) }         // total number of sets
+                var totalSets by remember { mutableIntStateOf(12) }         // total number of sets
                 var timerText by remember { mutableStateOf("01:00") }       // displayed timer text
                 var timerDurationMillis by remember { mutableLongStateOf(60_000L) } // timer length in ms
                 var showDialog by remember { mutableStateOf(false) }        // controls "Next Set" popup visibility
@@ -76,6 +76,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     val prefs = dataStore.data.first()
                     count = prefs[COUNT_KEY] ?: 0
+                    totalSets = prefs[TOTAL_SETS_KEY] ?: 12
                 }
 
                 // --- Save count to DataStore whenever it changes ---
@@ -83,6 +84,7 @@ class MainActivity : ComponentActivity() {
                     scope.launch {
                         dataStore.edit { settings ->
                             settings[COUNT_KEY] = count
+                            settings[TOTAL_SETS_KEY] = totalSets
                         }
                     }
                 }
@@ -460,7 +462,7 @@ fun PreviewCounter() {
     CounterAppTheme {
         CounterScreen(
             count = 3,
-            totalSets = 10,
+            totalSets = 12,
             timerText = "00:45",
             isTimerRunning = true,
             onIncrement = {},
