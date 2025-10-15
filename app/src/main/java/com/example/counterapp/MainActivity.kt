@@ -4,6 +4,8 @@ package com.example.counterapp
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Toast
+import android.media.ToneGenerator
+import android.media.AudioManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,15 +48,15 @@ val ComponentActivity.dataStore by preferencesDataStore(name = "settings")
 
 class MainActivity : ComponentActivity() {
 
-    private val COUNT_KEY = intPreferencesKey("count")
-    private val TOTAL_SETS_KEY = intPreferencesKey("total_sets")
+    private val COUNT_KEY = intPreferencesKey("count")  // store count value
+    private val TOTAL_SETS_KEY = intPreferencesKey("total_sets")  // store total sets value
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Makes layout extend behind system bars
 
         setContent {
-            // Set the app’s visual theme (Material 3)
+            // Set the app's visual theme (Material 3)
             CounterAppTheme {
 
                 // Compose tools
@@ -115,7 +117,11 @@ class MainActivity : ComponentActivity() {
                             override fun onFinish() {
                                 timerText = "00:00"
                                 isTimerRunning = false
-                                showDialog = true // Show “Next Set” dialog
+
+                                // Play "bip bip" sound
+                                playBeepSound()
+
+                                showDialog = true // Show "Next Set" dialog
 
                                 // Auto dismiss after 3 seconds
                                 scope.launch {
@@ -168,6 +174,24 @@ class MainActivity : ComponentActivity() {
                     onDismissDialog = { showDialog = false }
                 )
             }
+        }
+    }
+
+    // Function to play "bip bip" sound
+    private fun playBeepSound() {
+        try {
+            val toneGen = ToneGenerator(AudioManager.STREAM_ALARM, 100)
+            // Play first beep
+            toneGen.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+            // Delay and play second beep
+            Thread {
+                Thread.sleep(300)
+                toneGen.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+                Thread.sleep(500)
+                toneGen.release()
+            }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
@@ -475,3 +499,4 @@ fun PreviewCounter() {
         )
     }
 }
+
